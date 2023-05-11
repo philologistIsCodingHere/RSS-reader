@@ -1,20 +1,20 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
-
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default {
   mode: process.env.NODE_ENV || 'development',
-  entry: './src/index.js',
-  devServer: {
-    open: true,
-    host: 'localhost',
-  },
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader'],
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+          },
+        },
       },
+      { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
       {
         test: /\.scss$/,
         use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
@@ -34,4 +34,7 @@ export default {
       template: 'index.html',
     }),
   ],
+  output: {
+    clean: true,
+  },
 };
