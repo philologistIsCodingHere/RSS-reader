@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "type": "module",
-  "description": "[![Actions Status](https://github.com/philologistIsCodingHere/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/philologistIsCodingHere/frontend-project-11/actions)",
+  "description": "RSS Reader is a service for aggregating RSS feeds, with which it is convenient to read various sources, such as blogs. It allows you to add an unlimited number of RSS feeds, updates them itself and adds new entries to the general feed.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,8 +10,28 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@webpack-cli/generators": "^3.0.4",
+    "css-loader": "^6.7.3",
     "eslint": "^8.40.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.27.5"
+    "eslint-plugin-import": "^2.27.5",
+    "html-webpack-plugin": "^5.5.1",
+    "postcss-loader": "^7.3.0",
+    "prettier": "^2.8.4",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2",
+    "style-loader": "^3.3.2",
+    "webpack": "^5.82.0",
+    "webpack-cli": "^5.1.1",
+    "webpack-dev-server": "^4.15.0",
+    "workbox-webpack-plugin": "^6.5.4"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "bootstrap": "^5.2.3",
+    "i18next": "^22.4.15",
+    "lodash": "^4.17.21",
+    "on-change": "^4.0.2",
+    "yup": "^1.1.1"
   }
 }
