@@ -1,39 +1,57 @@
-import { object, string } from 'yup';
+import { object, string, setLocale } from 'yup';
+import i18next from 'i18next';
 import watch from './view.js';
-
-const schema = object().shape({
-  url: string().url().nullable(),
-});
+import resources from './locales/index.js';
 
 export default () => {
+  const defaultLang = 'ru';
+
   const initialState = {
     form: {
       status: null,
       valid: false,
-      errors: [],
+      error: '',
     },
   };
+
+  const i18n = i18next.createInstance();
+  i18n
+    .init({
+      lng: defaultLang,
+      debug: false,
+      resources,
+    });
+
+  setLocale({
+    mixed: {
+      url: () => ({ key: 'errors.invalidUrl' }),
+    },
+  });
+
+  const schema = object().shape({
+    url: string().url().nullable(),
+  });
 
   const elements = {
     form: document.querySelector('form'),
     input: document.querySelector('input'),
-    errors: document.querySelector('.feedback'),
+    error: document.querySelector('.feedback'),
   };
 
-  const watchedState = watch(elements, initialState);
+  const watchedState = watch(elements, initialState, i18n);
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     schema.validate({ url: elements.input.value })
       .then(() => {
         watchedState.form.valid = true;
-        watchedState.form.errors = [];
+        watchedState.form.error = '';
         watchedState.form.status = 'valid';
       })
-      .catch((error) => {
+      .catch((err) => {
         watchedState.form.valid = false;
-        if (!initialState.form.errors.includes(error.message)) {
-          watchedState.form.errors.push(error.message);
+        if (!initialState.form.error.includes(err.name)) {
+          watchedState.form.error = err.name;
         }
         watchedState.form.status = 'error';
       });

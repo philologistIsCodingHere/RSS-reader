@@ -1,16 +1,16 @@
 import onChange from 'on-change';
 
-export default (elements, state) => {
-  const { input, errors } = elements;
+export default (elements, state, i18n) => {
+  const { input, error } = elements;
 
   const renderErrors = () => {
-    state.form.errors.forEach((error) => {
-      errors.textContent += error;
-    });
+    if (state.form.error === 'ValidationError') {
+      error.textContent = i18n.t('errors.invalidUrl');
+    }
   };
 
   const handleErrors = () => {
-    if (state.form.errors.length) {
+    if (state.form.error !== '') {
       input.classList.add('is-invalid');
     } else {
       input.classList.remove('is-invalid');
@@ -18,7 +18,7 @@ export default (elements, state) => {
   };
 
   const clearErrors = () => {
-    errors.textContent = '';
+    error.textContent = '';
   };
 
   const watchedState = onChange(state, (path) => {
@@ -26,7 +26,7 @@ export default (elements, state) => {
       case 'form.status':
         handleErrors();
         break;
-      case 'form.errors':
+      case 'form.error':
         renderErrors();
         break;
       case 'form.valid':
