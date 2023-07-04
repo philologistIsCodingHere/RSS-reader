@@ -1,6 +1,9 @@
 import { object, string, setLocale } from 'yup';
+import { uniqueId } from 'lodash';
 import i18next from 'i18next';
+import axios from 'axios';
 import watch from './view.js';
+import parser from './parser.js';
 import resources from './locales/index.js';
 
 export default () => {
@@ -11,6 +14,8 @@ export default () => {
       status: null,
       valid: false,
       error: '',
+      feeds: [],
+      posts: [],
     },
   };
 
@@ -32,6 +37,12 @@ export default () => {
     url: string().url().nullable(),
   });
 
+  const addId = (posts) => posts.map((post) => {
+    const newPost = post;
+    newPost.id = uniqueId();
+    return newPost;
+  });
+
   const elements = {
     form: document.querySelector('form'),
     input: document.querySelector('input'),
@@ -40,6 +51,13 @@ export default () => {
 
   const watchedState = watch(elements, initialState, i18n);
 
+  const addProxy = (url) => {
+    const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
+    proxyUrl.searchParams.append('disableCache', 'true');
+    proxyUrl.searchParams.append('url', url);
+    return proxyUrl.toString();
+  };
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     schema.validate({ url: elements.input.value })
@@ -47,6 +65,12 @@ export default () => {
         watchedState.form.valid = true;
         watchedState.form.error = '';
         watchedState.form.status = 'valid';
+        axios.get((addProxy(elements.input.value)))
+          .then((response) => {
+            const { feed, posts } = parser(response.data.contents);
+            watchedState.form.feeds.push(feed);
+            watchedState.form.posts.push(...addId(posts));
+          });
       })
       .catch((err) => {
         watchedState.form.valid = false;
