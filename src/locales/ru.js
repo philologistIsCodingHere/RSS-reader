@@ -6,9 +6,11 @@ export default {
     feeds: 'Фиды',
     posts: 'Посты',
     view: 'Просмотр',
-    success: 'RSS успешно загружен',
-    errors: {
-      invalidUrl: 'Ссылка должна быть валидным URL',
+    feedback: {
+      success: 'RSS успешно загружен',
+      ValidationError: 'Ссылка должна быть валидным URL',
+      notOneOf: 'RSS уже существует',
+      isEmpty: 'Не должно быть пустым',
     },
   },
 };
