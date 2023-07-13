@@ -11,6 +11,9 @@ export default {
       ValidationError: 'Ссылка должна быть валидным URL',
       notOneOf: 'RSS уже существует',
       isEmpty: 'Не должно быть пустым',
+      networkError: 'Ошибка сети',
+      notRss: 'RSS отсутствует',
+      unknown: 'Неизвестная ошибка',
     },
   },
 };

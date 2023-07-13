@@ -11,11 +11,11 @@ export default () => {
 
   const initialState = {
     form: {
-      status: null,
       valid: false,
       feedback: '',
       feeds: [],
       posts: [],
+      displayedPost: {},
     },
   };
 
@@ -51,6 +51,10 @@ export default () => {
     form: document.querySelector('form'),
     input: document.querySelector('input'),
     feedback: document.querySelector('.feedback'),
+    posts: document.querySelector('.posts'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalDescription: document.querySelector('.modal-body'),
+    modalLink: document.querySelector('.modal-footer a'),
   };
 
   const watchedState = watch(elements, initialState, i18n);
@@ -76,6 +80,9 @@ export default () => {
         const newPosts = posts.filter((post) => !displayedPostLinks.includes(post.link));
         addPostsId(newPosts, feed.id);
         watchedState.form.posts.unshift(...newPosts);
+      })
+      .catch((e) => {
+        console.log(`Failed to load RSS. Code error: ${e.key}`);
       }));
     Promise.all(promises)
       .finally(() => {
@@ -91,6 +98,16 @@ export default () => {
     watchedState.form.posts.push(...newPosts);
   };
 
+  const handleError = (error) => {
+    if (error.isParsingError) {
+      return 'notRss';
+    }
+    if (axios.isAxiosError(error)) {
+      return 'networkError';
+    }
+    return error.message.key ?? 'unknown';
+  };
+
   elements.form.addEventListener('submit', (e) => {
     const data = new FormData(elements.form);
     const newUser = Object.fromEntries(data);
@@ -100,22 +117,33 @@ export default () => {
     schema.validate(newUser, { abortEarly: false })
       .then(() => {
         watchedState.form.valid = true;
-        watchedState.form.feedback = 'success';
-        watchedState.form.status = 'valid';
-        axios.get((addProxy(elements.input.value)))
+        const inputValue = elements.input.value;
+        axios.get((addProxy(inputValue)))
           .then((response) => {
             const url = data.get('url');
             const dataParser = parser(response.data.contents, url);
             handleData(dataParser);
+            watchedState.form.feedback = 'success';
+          })
+          .catch((err) => {
+            watchedState.form.feedback = handleError(err);
           });
       })
       .catch((err) => {
         watchedState.form.valid = false;
         if (!initialState.form.feedback.includes(err.message.key)) {
-          watchedState.form.feedback = err.message.key;
+          watchedState.form.feedback = handleError(err);
         }
-        watchedState.form.status = 'error';
       });
   });
+
+  elements.posts.addEventListener('click', (e) => {
+    const postId = e.target.dataset.id;
+    if (postId) {
+      const post = watchedState.form.posts.filter((item) => item.id === postId);
+      watchedState.form.displayedPost = post;
+    }
+  });
+
   updatePosts();
 };

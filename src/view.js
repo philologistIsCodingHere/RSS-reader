@@ -3,11 +3,7 @@ import onChange from 'on-change';
 export default (elements, state, i18n) => {
   const { input, feedback } = elements;
 
-  const renderFeedbacks = (content) => {
-    feedback.textContent = i18n.t(`feedback.${content}`);
-  };
-
-  const handleFeedbacks = () => {
+  const handleFeedbacks = (content) => {
     if (state.form.feedback !== 'success') {
       input.classList.add('is-invalid');
       feedback.classList.remove('text-success');
@@ -16,7 +12,9 @@ export default (elements, state, i18n) => {
       input.classList.remove('is-invalid');
       feedback.classList.remove('text-danger');
       feedback.classList.add('text-success');
+      input.value = '';
     }
+    feedback.textContent = i18n.t(`feedback.${content}`);
   };
 
   const createList = (title) => {
@@ -105,17 +103,27 @@ export default (elements, state, i18n) => {
     posts.forEach((post) => list.append(createPost(post)));
   };
 
-  const watchedState = onChange(state, (path) => {
+  const renderDisplayedPost = (post) => {
+    const [{ title, description, link }] = post;
+    const { modalTitle, modalDescription, modalLink } = elements;
+    modalTitle.textContent = title;
+    modalDescription.textContent = description;
+    modalLink.setAttribute('href', link);
+  };
+
+  const watchedState = onChange(state, (path, value) => {
     switch (path) {
       case 'form.feedback':
-        renderFeedbacks(state.form.feedback);
-        handleFeedbacks();
+        handleFeedbacks(value);
         break;
       case 'form.feeds':
-        renderFeeds(state.form.feeds);
+        renderFeeds(value);
         break;
       case 'form.posts':
-        renderPosts(state.form.posts);
+        renderPosts(value);
+        break;
+      case 'form.displayedPost':
+        renderDisplayedPost(value);
         break;
       default:
         break;
