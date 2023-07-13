@@ -12,7 +12,7 @@ export default {
       notOneOf: 'RSS уже существует',
       isEmpty: 'Не должно быть пустым',
       networkError: 'Ошибка сети',
-      notRss: 'RSS отсутствует',
+      notRss: 'Ресурс не содержит валидный RSS',
       unknown: 'Неизвестная ошибка',
     },
   },
