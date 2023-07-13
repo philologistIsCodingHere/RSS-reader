@@ -13,7 +13,7 @@ export default () => {
     form: {
       status: null,
       valid: false,
-      error: '',
+      feedback: '',
       feeds: [],
       posts: [],
     },
@@ -28,28 +28,36 @@ export default () => {
     });
 
   setLocale({
+    string: {
+      url: () => ({ key: 'ValidationError' }),
+      required: () => ({ key: 'isEmpty' }),
+    },
     mixed: {
-      url: () => ({ key: 'errors.invalidUrl' }),
+      notOneOf: () => ({ key: 'notOneOf' }),
     },
   });
 
-  const schema = object().shape({
-    url: string().url().nullable(),
-  });
-
-  const addId = (posts) => posts.map((post) => {
-    const newPost = post;
-    newPost.id = uniqueId();
-    return newPost;
-  });
+  const addPostsId = (posts, feedId) => {
+    const newPosts = posts.map((post) => {
+      const newPost = post;
+      newPost.id = uniqueId();
+      newPost.feedId = feedId;
+      return newPost;
+    });
+    return newPosts;
+  };
 
   const elements = {
     form: document.querySelector('form'),
     input: document.querySelector('input'),
-    error: document.querySelector('.feedback'),
+    feedback: document.querySelector('.feedback'),
   };
 
   const watchedState = watch(elements, initialState, i18n);
+
+  const makeSchema = (links) => object().shape({
+    url: string().url().nullable().notOneOf(links),
+  });
 
   const addProxy = (url) => {
     const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
@@ -58,26 +66,56 @@ export default () => {
     return proxyUrl.toString();
   };
 
+  const updatePosts = () => {
+    const promises = watchedState.form.feeds.map((feed) => axios.get(addProxy(feed.link))
+      .then((response) => {
+        const { posts } = parser(response.data.contents);
+        const postsFromState = watchedState.form.posts;
+        const postsWithCurrentId = postsFromState.filter((post) => post.feedId === feed.id);
+        const displayedPostLinks = postsWithCurrentId.map((post) => post.link);
+        const newPosts = posts.filter((post) => !displayedPostLinks.includes(post.link));
+        addPostsId(newPosts, feed.id);
+        watchedState.form.posts.unshift(...newPosts);
+      }));
+    Promise.all(promises)
+      .finally(() => {
+        setTimeout(() => updatePosts(), 5000);
+      });
+  };
+
+  const handleData = (data) => {
+    const { feed, posts } = data;
+    feed.id = uniqueId();
+    watchedState.form.feeds.push(feed);
+    const newPosts = addPostsId(posts, feed.id);
+    watchedState.form.posts.push(...newPosts);
+  };
+
   elements.form.addEventListener('submit', (e) => {
+    const data = new FormData(elements.form);
+    const newUser = Object.fromEntries(data);
     e.preventDefault();
-    schema.validate({ url: elements.input.value })
+    const links = initialState.form.feeds.map((feed) => feed.link);
+    const schema = makeSchema(links);
+    schema.validate(newUser, { abortEarly: false })
       .then(() => {
         watchedState.form.valid = true;
-        watchedState.form.error = '';
+        watchedState.form.feedback = 'success';
         watchedState.form.status = 'valid';
         axios.get((addProxy(elements.input.value)))
           .then((response) => {
-            const { feed, posts } = parser(response.data.contents);
-            watchedState.form.feeds.push(feed);
-            watchedState.form.posts.push(...addId(posts));
+            const url = data.get('url');
+            const dataParser = parser(response.data.contents, url);
+            handleData(dataParser);
           });
       })
       .catch((err) => {
         watchedState.form.valid = false;
-        if (!initialState.form.error.includes(err.name)) {
-          watchedState.form.error = err.name;
+        if (!initialState.form.feedback.includes(err.message.key)) {
+          watchedState.form.feedback = err.message.key;
         }
         watchedState.form.status = 'error';
       });
   });
+  updatePosts();
 };

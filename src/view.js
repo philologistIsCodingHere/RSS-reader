@@ -1,24 +1,22 @@
 import onChange from 'on-change';
 
 export default (elements, state, i18n) => {
-  const { input, error } = elements;
+  const { input, feedback } = elements;
 
-  const renderErrors = () => {
-    if (state.form.error === 'ValidationError') {
-      error.textContent = i18n.t('errors.invalidUrl');
-    }
+  const renderFeedbacks = (content) => {
+    feedback.textContent = i18n.t(`feedback.${content}`);
   };
 
-  const handleErrors = () => {
-    if (state.form.error !== '') {
+  const handleFeedbacks = () => {
+    if (state.form.feedback !== 'success') {
       input.classList.add('is-invalid');
+      feedback.classList.remove('text-success');
+      feedback.classList.add('text-danger');
     } else {
       input.classList.remove('is-invalid');
+      feedback.classList.remove('text-danger');
+      feedback.classList.add('text-success');
     }
-  };
-
-  const clearErrors = () => {
-    error.textContent = '';
   };
 
   const createList = (title) => {
@@ -101,6 +99,7 @@ export default (elements, state, i18n) => {
 
   const renderPosts = (posts) => {
     const postsClass = document.querySelector('.posts');
+    postsClass.innerHTML = '';
     postsClass.append(createList('posts'));
     const list = postsClass.querySelector('ul');
     posts.forEach((post) => list.append(createPost(post)));
@@ -108,14 +107,9 @@ export default (elements, state, i18n) => {
 
   const watchedState = onChange(state, (path) => {
     switch (path) {
-      case 'form.status':
-        handleErrors();
-        break;
-      case 'form.error':
-        renderErrors();
-        break;
-      case 'form.valid':
-        clearErrors();
+      case 'form.feedback':
+        renderFeedbacks(state.form.feedback);
+        handleFeedbacks();
         break;
       case 'form.feeds':
         renderFeeds(state.form.feeds);
