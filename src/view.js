@@ -74,7 +74,11 @@ export default (elements, state, i18n) => {
       'border-0',
       'border-end-0',
     );
-    linkItem.classList.add('fw-bold');
+    if (state.form.visitedPostsId.has(id)) {
+      linkItem.classList.add('fw-normal', 'link-secondary');
+    } else {
+      linkItem.classList.add('fw-bold');
+    }
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
 
     linkItem.setAttribute('href', link);
@@ -120,7 +124,8 @@ export default (elements, state, i18n) => {
         renderFeeds(value);
         break;
       case 'form.posts':
-        renderPosts(value);
+      case 'form.visitedPostsId':
+        renderPosts(state.form.posts);
         break;
       case 'form.displayedPost':
         renderDisplayedPost(value);

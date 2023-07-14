@@ -16,6 +16,7 @@ export default () => {
       feeds: [],
       posts: [],
       displayedPost: {},
+      visitedPostsId: new Set(),
     },
   };
 
@@ -60,7 +61,8 @@ export default () => {
   const watchedState = watch(elements, initialState, i18n);
 
   const makeSchema = (links) => object().shape({
-    url: string().url().nullable().notOneOf(links),
+    url: string().url().trim().nullable()
+      .notOneOf(links),
   });
 
   const addProxy = (url) => {
@@ -142,6 +144,7 @@ export default () => {
     if (postId) {
       const post = watchedState.form.posts.filter((item) => item.id === postId);
       watchedState.form.displayedPost = post;
+      watchedState.form.visitedPostsId.add(postId);
     }
   });
 
