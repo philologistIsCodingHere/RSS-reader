@@ -127,13 +127,14 @@ export default () => {
             const dataParser = parser(response.data.contents);
             handleData(dataParser, url);
             watchedState.form.feedback = 'success';
+          })
+          .catch((err) => {
+            watchedState.form.feedback = handleError(err);
           });
       })
       .catch((err) => {
         watchedState.form.valid = false;
-        if (!initialState.form.feedback.includes(err.message.key)) {
-          watchedState.form.feedback = handleError(err);
-        }
+        watchedState.form.feedback = handleError(err);
       });
   });
 
