@@ -11,7 +11,7 @@ const parsePost = (post) => {
   };
 };
 
-export default (rss, url) => {
+export default (rss) => {
   const parser = new DOMParser();
   const data = parser.parseFromString(rss, 'text/xml');
   const parseError = data.querySelector('parsererror');
@@ -23,7 +23,6 @@ export default (rss, url) => {
   const feedTitile = data.querySelector('title').textContent;
   const feedDescription = data.querySelector('description').textContent;
   const feed = {
-    link: url,
     title: feedTitile,
     description: feedDescription,
   };

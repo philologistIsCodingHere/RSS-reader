@@ -92,9 +92,10 @@ export default () => {
       });
   };
 
-  const handleData = (data) => {
+  const handleData = (data, url) => {
     const { feed, posts } = data;
     feed.id = uniqueId();
+    feed.link = url;
     watchedState.form.feeds.push(feed);
     const newPosts = addPostsId(posts, feed.id);
     watchedState.form.posts.push(...newPosts);
@@ -112,23 +113,20 @@ export default () => {
 
   elements.form.addEventListener('submit', (e) => {
     const data = new FormData(elements.form);
-    const newUser = Object.fromEntries(data);
+    const newUrl = Object.fromEntries(data);
     e.preventDefault();
     const links = initialState.form.feeds.map((feed) => feed.link);
     const schema = makeSchema(links);
-    schema.validate(newUser, { abortEarly: false })
+    schema.validate(newUrl, { abortEarly: false })
       .then(() => {
         watchedState.form.valid = true;
         const inputValue = elements.input.value;
         axios.get((addProxy(inputValue)))
           .then((response) => {
             const url = data.get('url');
-            const dataParser = parser(response.data.contents, url);
-            handleData(dataParser);
+            const dataParser = parser(response.data.contents);
+            handleData(dataParser, url);
             watchedState.form.feedback = 'success';
-          })
-          .catch((err) => {
-            watchedState.form.feedback = handleError(err);
           });
       })
       .catch((err) => {

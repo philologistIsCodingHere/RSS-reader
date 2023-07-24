@@ -55,6 +55,7 @@ export default (elements, state, i18n) => {
 
   const renderFeeds = (feeds) => {
     const feedsClass = document.querySelector('.feeds');
+    feedsClass.innerHTML = '';
     feedsClass.append(createList('feeds'));
     const list = feedsClass.querySelector('ul');
     feeds.forEach((feed) => list.append(createFeed(feed)));
