@@ -53,14 +53,6 @@ export default (elements, state, i18n) => {
     return listItem;
   };
 
-  const renderFeeds = (feeds) => {
-    const feedsClass = document.querySelector('.feeds');
-    feedsClass.innerHTML = '';
-    feedsClass.append(createList('feeds'));
-    const list = feedsClass.querySelector('ul');
-    feeds.forEach((feed) => list.append(createFeed(feed)));
-  };
-
   const createPost = (post) => {
     const { title, link, id } = post;
     const listItem = document.createElement('li');
@@ -100,12 +92,16 @@ export default (elements, state, i18n) => {
     return listItem;
   };
 
-  const renderPosts = (posts) => {
-    const postsClass = document.querySelector('.posts');
-    postsClass.innerHTML = '';
-    postsClass.append(createList('posts'));
-    const list = postsClass.querySelector('ul');
-    posts.forEach((post) => list.append(createPost(post)));
+  const renderContent = (item, content) => {
+    const contentElement = document.querySelector(`.${content}`);
+    contentElement.innerHTML = '';
+    contentElement.append(createList(content));
+    const list = contentElement.querySelector('ul');
+    if (content === 'feeds') {
+      item.forEach((feed) => list.append(createFeed(feed)));
+    } else {
+      item.forEach((post) => list.append(createPost(post)));
+    }
   };
 
   const renderDisplayedPost = (post) => {
@@ -122,11 +118,11 @@ export default (elements, state, i18n) => {
         handleFeedbacks(value);
         break;
       case 'form.feeds':
-        renderFeeds(value);
+        renderContent(value, 'feeds');
         break;
       case 'form.posts':
       case 'form.visitedPostsId':
-        renderPosts(state.form.posts);
+        renderContent(state.form.posts, 'posts');
         break;
       case 'form.displayedPost':
         renderDisplayedPost(value);
