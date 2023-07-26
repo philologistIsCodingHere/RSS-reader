@@ -1,7 +1,22 @@
 import onChange from 'on-change';
 
 export default (elements, state, i18n) => {
-  const { input, feedback } = elements;
+  const { input, feedback, submit } = elements;
+
+  const handleStatus = (status) => {
+    switch (status) {
+      case 'sending':
+        submit.disabled = true;
+        input.readOnly = true;
+        feedback.textContent = '';
+        input.classList.remove('is-invalid');
+        break;
+      default:
+        submit.disabled = false;
+        input.readOnly = false;
+        break;
+    }
+  };
 
   const handleFeedbacks = (content) => {
     if (state.form.feedback !== 'success') {
@@ -14,7 +29,7 @@ export default (elements, state, i18n) => {
       feedback.classList.add('text-success');
       input.value = '';
     }
-    feedback.textContent = i18n.t(`feedback.${content}`);
+    feedback.textContent = i18n(`feedback.${content}`);
   };
 
   const createList = (title) => {
@@ -27,7 +42,7 @@ export default (elements, state, i18n) => {
     cardBody.classList.add('card-body');
     cardTitle.classList.add('card-title', 'h4');
     list.classList.add('list-group', 'border-0', 'rounded-0');
-    cardTitle.textContent = i18n.t(title);
+    cardTitle.textContent = i18n(title);
 
     cardBody.append(cardTitle);
     card.append(cardBody);
@@ -67,7 +82,7 @@ export default (elements, state, i18n) => {
       'border-0',
       'border-end-0',
     );
-    if (state.form.visitedPostsId.has(id)) {
+    if (state.visitedPostsId.has(id)) {
       linkItem.classList.add('fw-normal', 'link-secondary');
     } else {
       linkItem.classList.add('fw-bold');
@@ -84,7 +99,7 @@ export default (elements, state, i18n) => {
     button.setAttribute('data-bs-toggle', 'modal');
     button.setAttribute('data-bs-target', '#modal');
     linkItem.textContent = title;
-    button.textContent = i18n.t('view');
+    button.textContent = i18n('view');
 
     listItem.append(linkItem);
     listItem.append(button);
@@ -114,17 +129,20 @@ export default (elements, state, i18n) => {
 
   const watchedState = onChange(state, (path, value) => {
     switch (path) {
+      case 'form.status':
+        handleStatus(value);
+        break;
       case 'form.feedback':
         handleFeedbacks(value);
         break;
-      case 'form.feeds':
+      case 'feeds':
         renderContent(value, 'feeds');
         break;
-      case 'form.posts':
-      case 'form.visitedPostsId':
-        renderContent(state.form.posts, 'posts');
+      case 'posts':
+      case 'visitedPostsId':
+        renderContent(state.posts, 'posts');
         break;
-      case 'form.displayedPost':
+      case 'displayedPost':
         renderDisplayedPost(value);
         break;
       default:
