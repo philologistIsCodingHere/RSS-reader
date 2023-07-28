@@ -17,7 +17,9 @@ export default () => {
     },
     feeds: [],
     posts: [],
-    displayedPost: [],
+    modal: {
+      postId: null,
+    },
     visitedPostsId: new Set(),
   };
 
@@ -142,8 +144,7 @@ export default () => {
       elements.posts.addEventListener('click', (e) => {
         const postId = e.target.dataset.id;
         if (e.target.type === 'button') {
-          const post = watchedState.posts.find((item) => item.id === postId);
-          watchedState.displayedPost.push(post);
+          watchedState.modal.postId = postId;
         }
         watchedState.visitedPostsId.add(postId);
       });

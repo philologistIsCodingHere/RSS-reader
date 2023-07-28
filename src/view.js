@@ -119,12 +119,12 @@ export default (elements, state, i18n) => {
     }
   };
 
-  const renderDisplayedPost = (post) => {
-    const [{ title, description, link }] = post;
+  const renderDisplayedPost = (postId) => {
     const { modalTitle, modalDescription, modalLink } = elements;
-    modalTitle.textContent = title;
-    modalDescription.textContent = description;
-    modalLink.setAttribute('href', link);
+    const currentPost = state.posts.find((post) => post.id === postId);
+    modalTitle.textContent = currentPost.title;
+    modalDescription.textContent = currentPost.description;
+    modalLink.setAttribute('href', currentPost.link);
   };
 
   const watchedState = onChange(state, (path, value) => {
@@ -142,7 +142,7 @@ export default (elements, state, i18n) => {
       case 'visitedPostsId':
         renderContent(state.posts, 'posts');
         break;
-      case 'displayedPost':
+      case 'modal.postId':
         renderDisplayedPost(value);
         break;
       default:
